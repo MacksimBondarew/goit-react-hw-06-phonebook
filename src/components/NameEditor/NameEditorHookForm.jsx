@@ -1,3 +1,4 @@
+import { nanoid } from 'nanoid';
 import { useForm } from 'react-hook-form';
 import { object, string } from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -11,6 +12,9 @@ import {
     ErroText,
     ErrorIcon,
 } from './NameEditor.styled';
+import { addNameContact } from '../../redux/state';
+import { getContacts } from '../../redux/selectors';
+import { useDispatch, useSelector } from 'react-redux';
 
 const schema = object({
     name: string()
@@ -27,7 +31,7 @@ const schema = object({
         .required(),
 }).required();
 
-const NameEditorHookForm = ({ onSubmit, people }) => {
+const NameEditorHookForm = () => {
     const {
         register,
         handleSubmit,
@@ -40,6 +44,16 @@ const NameEditorHookForm = ({ onSubmit, people }) => {
         },
         resolver: yupResolver(schema),
     });
+    const people = useSelector(getContacts);
+    const dispatch = useDispatch();
+    const addName = (name, number) => {
+        const contact = {
+            id: nanoid(),
+            name,
+            number,
+        };
+        dispatch(addNameContact(contact));
+    };
 
     function removeNonDigits(str) {
         return str.replace(/\D/g, '');
@@ -57,7 +71,7 @@ const NameEditorHookForm = ({ onSubmit, people }) => {
             alert(`${name} and phone number ${number} is already in contacts`);
             return;
         }
-        onSubmit(name, number);
+        addName(name, number);
         reset();
     };
 

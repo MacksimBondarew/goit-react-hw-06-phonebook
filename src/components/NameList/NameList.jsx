@@ -1,11 +1,25 @@
-import PropTypes from 'prop-types';
 import { ContactsList, ContactItem } from './NameList.styled';
 import ContactName from '../ContactName/ContactName';
+import { useSelector, useDispatch } from 'react-redux';
+import { deleteNameContact } from '../../redux/state';
+import { getContacts, getFilter } from '../../redux/selectors';
 
-const NameList = ({ contacts, deleteName }) => {
+const NameList = () => {
+    const filter = useSelector(getFilter);
+    const contacts = useSelector(getContacts);
+    const dispatch = useDispatch();
+    const getVisibleName = () => {
+        const normalizedName = filter.trim().toLowerCase();
+        return contacts.filter(contact =>
+            contact.name.toLowerCase().includes(normalizedName)
+        );
+    };
+    const deleteName = nameId => {
+        dispatch(deleteNameContact(nameId));
+    };
     return (
         <ContactsList>
-            {contacts.map(({ id, name, number }) => (
+            {getVisibleName().map(({ id, name, number }) => (
                 <ContactItem key={id}>
                     <ContactName
                         id={id}
@@ -17,17 +31,6 @@ const NameList = ({ contacts, deleteName }) => {
             ))}
         </ContactsList>
     );
-};
-
-NameList.propTypes = {
-    deleteName: PropTypes.func.isRequired,
-    contacts: PropTypes.arrayOf(
-        PropTypes.shape({
-            id: PropTypes.string.isRequired,
-            name: PropTypes.string.isRequired,
-            number: PropTypes.string.isRequired,
-        }).isRequired
-    ).isRequired,
 };
 
 export default NameList;
